@@ -1,0 +1,85 @@
+import flask
+import pymongo
+class employees : 
+    def __init__(self,name,experience,salary):
+        self.name=name
+        self.experience=experience
+        self.salary=salary
+        self.empdict = {'name':name,'experience':experience,'salary':salary,'id':counter}
+
+class login(employees):
+    def __init__(self,name,experience,salary,password):
+        employees.__init__(self,name,experience,salary)
+        self.password=password
+        self.passdict={'name':name,'password':password}
+        
+class products : 
+    def __init__(self,item,price,stock):
+        self.item=item
+        self.price=price
+        self.stock=stock
+        self.eledict={'item': item,'price': price,'stock':stock}
+        
+counter=0
+
+myclient = pymongo.MongoClient()
+
+db =myclient.db
+
+emp = db.employee
+
+from flask import Flask,render_template,request , url_for
+app = Flask(__name__)
+class_dict = {}
+@app.route("/",methods=['GET','POST'])
+def index():
+    return "<form method='POST' action='mainpage' ><input type = 'text' name='name' placeholder='Name'><input type = 'password' name='password' placeholder='password'><button>Submit</button></form>"
+
+@app.route("/mainpage",methods=['POST'])
+def mainpage():
+    name1 = request.form.get("name")
+    pass1 = request.form.get("password")
+    if name1 == 'shivam' and pass1 == 'nuage':
+        return "<h1>Welcome</h1><button><a href='/add'><h2>add employee</h2></a></button><button><a href='/update'><h2>update employee</h2></a></button><button><a href='/delete'><h2>delete employee</h2></a></button>"
+    elif request.method =="POST":
+        return "<h1>Welcome</h1><button><a href='/add'><h2>add employee</h2></a></button><button><a href='/update'><h2>update employee</h2></a></button><button><a href='/delete'><h2>delete employee</h2></a></button>"
+    else:
+        return 'access denied'
+@app.route("/add")
+def add():
+    return "<form method='POST' action='/mainpage'><input type = 'text' name='empname' placeholder='Name'><input type = 'text' name='salary' placeholder='salary'><input type = 'text' name='experience' placeholder='experience'><button>Submit</button></form>"
+    empnmae=request.form.get('empname')
+    salary=request.form.get('salary')
+    experience= request.form.get('experience')
+    class_dict[counter]= employees(empname,salary,experience)
+    emp.insert_one(class_dict[counter].empdict)
+    counter = counter+1
+    
+    
+@app.route("/update")
+def update():
+    return "<form method='POST' action='/mainpage'><input type = 'text' name='empname' placeholder='Name'><input type = 'integer' name='id' placeholder='ID'></ br><h1>Enter new details</h1><input type = 'text' name='empname1' placeholder='Name'><input type = 'text' name='salary' placeholder='salary'><input type = 'text' name='experience' placeholder='experience'><button>Submit</button></form>"
+    empname=request.form.get('empname')
+    empname1=request.form.get('empname1')
+    salary=request.form.get('salary')
+    experience= request.form.get('experience')
+    _id = request.form.get('id')
+    myquery = { "name": empname , 'id': _id }
+    newvalues = { "$set": { "name": empname1,"salary":salary ,"experience":experience } }
+    emp.update_one(myquery, newvalues)
+
+@app.route("/delete")
+def delete():
+    return "<form method='POST' action='/mainpage'><input type = 'text' name='empname' placeholder='Name'><input type = 'text' name='salary' placeholder='salary'><input type = 'text' name='experience' placeholder='experience'><button>Submit</button></form>"
+    empnmae=request.form.get('empname')
+    salary=request.form.get('salary')
+    experience= request.form.get('experience')
+    myquery = {'name':empname,'salary':salary,'experience':experience}
+    emp.delete_one(myquery)
+    
+    
+    
+if __name__ == "__main__":
+    app.run()
+
+
